@@ -1,0 +1,5 @@
+tools/
+dist/
+keystore/*.keystore
+decompiled/apktool-raw/build/
+decompiled/apktool-readable/build/
