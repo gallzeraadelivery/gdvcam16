@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:theme="@style/Theme.Vcamera2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/rounded_bg"
+            android:padding="28dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+            <TextView
+                android:textSize="18dp"
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:text="最新版本:"/>
+            <TextView
+                android:textSize="16dp"
+                android:autoLink="none"
+                android:linksClickable="true"
+                android:id="@+id/contact"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="18.0,永久离线退圈版"
+                android:textIsSelectable="true"/>
+            <TextView
+                android:textSize="18dp"
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="80dp"
+                android:layout_marginBottom="10dp"
+                android:text="友情提示:"/>
+            <TextView
+                android:textSize="14dp"
+                android:autoLink="none"
+                android:linksClickable="true"
+                android:id="@+id/notice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="版本永久免费,没有激活码，欢迎各大厂家分析，没有加壳没有加密可以自己更改界面所有内容，有个异想天开的人找人破解了一个多月,天天熬夜加班的破解 我都看着累，心想着破解了就赚钱了，还想卖钱真是笑死我了，正版的都卖不了两个钱还想卖破解版(11.0的老版本)割韭菜，连15.0版本都破解不了只是一个淘汰的被检测的版本，修改界面主题颜色修改主页文字就说自己开发的丢人现眼，没有源码什么都更新不了，瞎吹加了什么功能纯属扯淡，连破解都没破解完32位so都直接没破解，大家千万别被骗了。这是最新版18.0能过掉所有APP检测，去掉了网络验证直接本地离线运行免费发出了。"/>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
