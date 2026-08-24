@@ -247,7 +247,7 @@
 
     invoke-direct {v7, v0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
 
-    const-string v8, "ApliqxCam"
+    const-string v8, "\u2194 Arraste aqui  \u2022  ApliqxCam"
 
     invoke-virtual {v7, v8}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
@@ -258,6 +258,14 @@
     invoke-virtual {v7, v1}, Landroid/widget/TextView;->setTextColor(I)V
 
     iput-object v7, v0, Lcom/apex/cam/OverlayService;->h:Landroid/widget/TextView;
+
+    # The expanded panel needs its own drag handle.  Reuse the bubble's touch
+    # listener so movement, screen bounds and saved position stay identical.
+    new-instance v8, La/c0;
+
+    invoke-direct {v8, v0}, La/c0;-><init>(Lcom/apex/cam/OverlayService;)V
+
+    invoke-virtual {v7, v8}, Landroid/view/View;->setOnTouchListener(Landroid/view/View$OnTouchListener;)V
 
     iget-object v1, v0, Lcom/apex/cam/OverlayService;->f:Landroid/widget/LinearLayout;
 
