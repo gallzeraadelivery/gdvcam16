@@ -1696,6 +1696,17 @@
 
     iget v2, p0, Lcom/apex/cam/MainActivity;->X:I
 
+    invoke-static {v2}, Ljava/lang/Integer;->toString(I)Ljava/lang/String;
+
+    move-result-object v3
+
+    const-string v4, "/data/local/tmp/apexcam/rotation.cfg"
+
+    invoke-static {v3, v4}, Lcom/apex/cam/MainActivity;->l(Ljava/lang/String;Ljava/lang/String;)V
+
+    # The streamer rotates the prepared frame without changing its canvas.
+    const/4 v2, 0x0
+
     iget v3, p0, Lcom/apex/cam/MainActivity;->W:I
 
     const/4 v4, 0x3

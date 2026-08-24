@@ -1472,6 +1472,20 @@
 
     move-result v4
 
+    invoke-static {v4}, Ljava/lang/Integer;->toString(I)Ljava/lang/String;
+
+    move-result-object v7
+
+    const-string v8, "/data/local/tmp/apexcam/rotation.cfg"
+
+    const-string v9, "644"
+
+    invoke-static {v7, v8, v9}, La/f;->o(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+
+    # Rotation is applied by apexcam-streamer inside the existing NV21 canvas.
+    # Keep the hook transform at zero so 90/270 cannot invalidate its buffer.
+    const/4 v4, 0x0
+
     goto :cond_0
 
     add-int/lit16 v4, v4, 0xb4

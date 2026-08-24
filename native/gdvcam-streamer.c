@@ -21,6 +21,7 @@
 #define OUTPUT_PATH TMP_DIR "/live-buffer.nv21"
 #define FFMPEG_PATH TMP_DIR "/gdvcam-raw-ffmpeg"
 #define PROBE_FFMPEG_PATH TMP_DIR "/gdvcam-ffmpeg"
+#define ROTATION_PATH TMP_DIR "/rotation.cfg"
 
 typedef struct {
     uint32_t magic;
@@ -163,6 +164,87 @@ static int read_exact(int fd, uint8_t *data, size_t size) {
     return done == size ? 1 : 0;
 }
 
+static unsigned read_rotation(void) {
+    FILE *file = fopen(ROTATION_PATH, "r");
+    unsigned rotation = 0;
+    if (file) {
+        if (fscanf(file, "%u", &rotation) != 1) rotation = 0;
+        fclose(file);
+    }
+    rotation %= 360U;
+    return rotation == 90U || rotation == 180U || rotation == 270U ? rotation : 0U;
+}
+
+/* Rotate the prepared NV21 frame inside the existing output canvas.  Keeping
+ * width and height unchanged is essential: the camera hook and Xiaomi aspect
+ * selection continue to see exactly the original 9:16 or 3:4 geometry. */
+static void rotate_nv21_canvas(const uint8_t *src, uint8_t *dst,
+                               uint32_t width, uint32_t height,
+                               unsigned rotation) {
+    const size_t y_size = (size_t)width * height;
+    memset(dst, 16, y_size);
+    memset(dst + y_size, 128, y_size / 2U);
+
+    const uint32_t rotated_width = (rotation == 90U || rotation == 270U) ? height : width;
+    const uint32_t rotated_height = (rotation == 90U || rotation == 270U) ? width : height;
+    const uint64_t scale_x = ((uint64_t)width << 20) / rotated_width;
+    const uint64_t scale_y = ((uint64_t)height << 20) / rotated_height;
+    const uint64_t scale = scale_x < scale_y ? scale_x : scale_y;
+    uint32_t draw_width = (uint32_t)(((uint64_t)rotated_width * scale) >> 20) & ~1U;
+    uint32_t draw_height = (uint32_t)(((uint64_t)rotated_height * scale) >> 20) & ~1U;
+    if (!draw_width || !draw_height) return;
+    const uint32_t offset_x = (width - draw_width) / 2U;
+    const uint32_t offset_y = (height - draw_height) / 2U;
+
+    for (uint32_t dy = 0; dy < draw_height; ++dy) {
+        uint32_t ry = (uint32_t)(((uint64_t)dy * rotated_height) / draw_height);
+        for (uint32_t dx = 0; dx < draw_width; ++dx) {
+            uint32_t rx = (uint32_t)(((uint64_t)dx * rotated_width) / draw_width);
+            uint32_t sx, sy;
+            if (rotation == 90U) {
+                sx = ry;
+                sy = height - 1U - rx;
+            } else if (rotation == 180U) {
+                sx = width - 1U - rx;
+                sy = height - 1U - ry;
+            } else if (rotation == 270U) {
+                sx = width - 1U - ry;
+                sy = rx;
+            } else {
+                sx = rx;
+                sy = ry;
+            }
+            dst[(size_t)(offset_y + dy) * width + offset_x + dx] =
+                src[(size_t)sy * width + sx];
+        }
+    }
+
+    for (uint32_t dy = 0; dy < draw_height; dy += 2U) {
+        uint32_t ry = (uint32_t)(((uint64_t)dy * rotated_height) / draw_height) & ~1U;
+        for (uint32_t dx = 0; dx < draw_width; dx += 2U) {
+            uint32_t rx = (uint32_t)(((uint64_t)dx * rotated_width) / draw_width) & ~1U;
+            uint32_t sx, sy;
+            if (rotation == 90U) {
+                sx = ry;
+                sy = (height - 2U - rx) & ~1U;
+            } else if (rotation == 180U) {
+                sx = (width - 2U - rx) & ~1U;
+                sy = (height - 2U - ry) & ~1U;
+            } else if (rotation == 270U) {
+                sx = (width - 2U - ry) & ~1U;
+                sy = rx;
+            } else {
+                sx = rx;
+                sy = ry;
+            }
+            size_t source_uv = y_size + (size_t)(sy / 2U) * width + sx;
+            size_t dest_uv = y_size + (size_t)((offset_y + dy) / 2U) * width + offset_x + dx;
+            dst[dest_uv] = src[source_uv];
+            dst[dest_uv + 1U] = src[source_uv + 1U];
+        }
+    }
+}
+
 int main(int argc, char **argv) {
     if (argc < 2) return 2;
     signal(SIGINT, stop_handler);
@@ -189,7 +271,10 @@ int main(int argc, char **argv) {
     }
 
     uint8_t *frame = (uint8_t *)malloc(frame_bytes);
-    if (!frame) {
+    uint8_t *transformed = (uint8_t *)malloc(frame_bytes);
+    if (!frame || !transformed) {
+        free(frame);
+        free(transformed);
         close(output);
         return 7;
     }
@@ -204,9 +289,15 @@ int main(int argc, char **argv) {
         while (running) {
             int status = read_exact(decoder_fd, frame, frame_bytes);
             if (status != 1) break;
+            unsigned rotation = read_rotation();
+            const uint8_t *output_frame = frame;
+            if (rotation != 0U) {
+                rotate_nv21_canvas(frame, transformed, width, height, rotation);
+                output_frame = transformed;
+            }
             active = (active + 1U) % BUFFER_COUNT;
             off_t frame_offset = (off_t)HEADER_BYTES + ((off_t)active * frame_bytes);
-            if (pwrite(output, frame, frame_bytes, frame_offset) != (ssize_t)frame_bytes) {
+            if (pwrite(output, output_frame, frame_bytes, frame_offset) != (ssize_t)frame_bytes) {
                 running = 0;
                 break;
             }
@@ -235,6 +326,7 @@ int main(int argc, char **argv) {
         usleep(100000);
     }
 
+    free(transformed);
     free(frame);
     close(output);
     return 0;

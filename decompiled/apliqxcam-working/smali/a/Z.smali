@@ -128,23 +128,11 @@
 
     invoke-interface {p1}, Landroid/content/SharedPreferences$Editor;->apply()V
 
-    iget v1, v3, Lcom/apex/cam/OverlayService;->s:I
-
-    invoke-static {p0, v1}, La/f0;->b(Landroid/content/SharedPreferences;I)La/X;
-
-    move-result-object v2
-
-    iput v0, v2, La/X;->d:I
-
-    invoke-static {p0, v1, v2}, La/f0;->d(Landroid/content/SharedPreferences;ILa/X;)V
-
     invoke-virtual {v3}, Lcom/apex/cam/OverlayService;->h()V
 
     new-instance p1, La/O;
 
-    const/4 v0, 0x2
-
-    invoke-direct {p1, p0, v0}, La/O;-><init>(Landroid/content/SharedPreferences;I)V
+    invoke-direct {p1, p0, v1}, La/O;-><init>(Landroid/content/SharedPreferences;I)V
 
     iget-object p0, v3, Lcom/apex/cam/OverlayService;->a:Ljava/util/concurrent/ExecutorService;
 

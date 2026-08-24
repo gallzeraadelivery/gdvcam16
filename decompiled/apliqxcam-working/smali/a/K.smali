@@ -601,26 +601,23 @@
 
     invoke-virtual {p0, p1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
-    iget-boolean p0, v4, Lcom/apex/cam/MainActivity;->a0:Z
+    # Use exactly the same global-control path as mirror.  Rotation is a
+    # presentation transform only: no slot reprocessing and no stream restart.
+    invoke-virtual {v4, v1, v3}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
 
-    if-eqz p0, :cond_9
+    move-result-object p0
 
-    new-instance p0, La/I;
+    new-instance p1, La/O;
 
-    const/16 p1, 0x9
+    invoke-direct {p1, p0, v2}, La/O;-><init>(Landroid/content/SharedPreferences;I)V
 
-    invoke-direct {p0, v4, p1}, La/I;-><init>(Lcom/apex/cam/MainActivity;I)V
+    iget-object p0, v4, Lcom/apex/cam/MainActivity;->j:Ljava/util/concurrent/ExecutorService;
 
-    iget-object p1, v4, Lcom/apex/cam/MainActivity;->j:Ljava/util/concurrent/ExecutorService;
+    invoke-interface {p0, p1}, Ljava/util/concurrent/Executor;->execute(Ljava/lang/Runnable;)V
 
-    invoke-interface {p1, p0}, Ljava/util/concurrent/Executor;->execute(Ljava/lang/Runnable;)V
-
-    goto :goto_8
-
-    :cond_9
     iget-object p0, v4, Lcom/apex/cam/MainActivity;->k:Landroid/widget/TextView;
 
-    const-string p1, "Rota\u00e7\u00e3o salva para o pr\u00f3ximo Start."
+    const-string p1, "Rota\u00e7\u00e3o aplicada ao fluxo atual."
 
     invoke-virtual {p0, p1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
