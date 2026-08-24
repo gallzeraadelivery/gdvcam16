@@ -1,0 +1,95 @@
+Signature-Version: 1.0
+Created-By: 1.0 (Android)
+SHA-256-Digest-Manifest: igYmGxCsDqPPCJH+4rdhZGNkYiXXajbP+3HBydoj2S8=
+X-Android-APK-Signed: 2, 3
+
+Name: AndroidManifest.xml
+SHA-256-Digest: GKgXiT6VmRzItFCgaLLZ2dT3BNL6GVLvBx/DIRNCc+E=
+
+Name: META-INF/com/android/build/gradle/app-metadata.properties
+SHA-256-Digest: lO8bejTvyXHP8TSmZh0H8kyVCSpPuWmYtA5Kmr2/AKk=
+
+Name: META-INF/version-control-info.textproto
+SHA-256-Digest: JJIJGgtPxNoRwdR8R469z7ggV6+RXuAOJ7Fi5L1WeyI=
+
+Name: assets/99-apexcam.sh
+SHA-256-Digest: FcP3AQAckjMiM4yXmMB2VBL9RBhi4qc2EfXxRRX7g0s=
+
+Name: assets/apexcam-injector
+SHA-256-Digest: 7JFoHTe2oi0aanWA61vvhgjeknPVc+9S5QL5C8L4+ak=
+
+Name: assets/apexcam-streamer
+SHA-256-Digest: fXIfzETTJkTE0V6FVsPPDZPKUPy8BuvbRIrnLfU+tiQ=
+
+Name: assets/apexcamd
+SHA-256-Digest: 2zOlsrRmsEgJaoJ7rOTdQlvnitV1aEIfia8RGF6TtFQ=
+
+Name: assets/apliqxcam-cleaner
+SHA-256-Digest: w7C1Xwv8dl00P8jQSR1n/I5anCRWAJu7CFfX1lYDGUY=
+
+Name: assets/apliqxcam-frame-relay
+SHA-256-Digest: SVEJsCrqMoj+6Xzb41upaLuwrU6bLCzz9l4cskKvkOE=
+
+Name: assets/compat-profiles.json
+SHA-256-Digest: jSy7etwVSNuPSRvLmOpYvBCdx4ufJ+rwRyiiqonlhx0=
+
+Name: assets/frame-sequence.nv21
+SHA-256-Digest: LjSv1Q960gSBi+ugE3mlxG6FSwHURItZ/VLd6ZyL1U4=
+
+Name: assets/libapexcam_hook.so
+SHA-256-Digest: xZHoCxZ4oVqCQk/9n2HHI/iesf/eBFLg5EE7IAh9pnA=
+
+Name: assets/libapexcam_probe.so
+SHA-256-Digest: ZwA8BOl6tG1X5WpR1Dy1OBpu32yGBZFG3yRxfPYMrqs=
+
+Name: assets/libshadowhook.so
+SHA-256-Digest: 8osQVboLxNAV2cMRmUpIV4BI/Umwsf/r9a3lnA9lG3A=
+
+Name: assets/libshadowhook_nothing.so
+SHA-256-Digest: 8UmkGq44kAmJQAUrKpy0DlGozQcluZkeXN/b1TGkRzY=
+
+Name: classes.dex
+SHA-256-Digest: DFyID5ep2Jpfau8MOqDqSz13WW/kvkGmwn5U8oYG7nM=
+
+Name: res/drawable-nodpi/amazon_id_back_guide.jpg
+SHA-256-Digest: LoV32DtsRQDfgQ3DQt59fuQZsvzfxuoxtKDJ8pFjQCI=
+
+Name: res/drawable-nodpi/amazon_id_front_guide.jpg
+SHA-256-Digest: X/B/m9sIL/HTTC3NoLXdEN0uhYqtIQ6rLGf+6Tqgjn8=
+
+Name: res/drawable-nodpi/amazon_id_selfie_guide.png
+SHA-256-Digest: TrhSeJOKFWiQRuYfLQi0QFi3KKwpiSuVtKKyxOgisvM=
+
+Name: res/drawable-nodpi/apex_logo.png
+SHA-256-Digest: rh4qvd/fUSu/oD0phxHFHmLZFzboRmNwPyIGRNw8SdM=
+
+Name: res/drawable/ic_stat_apex.xml
+SHA-256-Digest: raEZYgkJ8YVDCLzntIv5R/vLjOzgyS86PyaWNfqLNLY=
+
+Name: res/mipmap-anydpi/ic_launcher.xml
+SHA-256-Digest: 7hlogG+g3fXnTBP0vZIRDRwKgnDKmnJT8D72Sv7wtGs=
+
+Name: res/mipmap-anydpi/ic_launcher_round.xml
+SHA-256-Digest: dckSXctCL6rM01BihIKj01Yli6nEQo25WsTweEINDqQ=
+
+Name: res/mipmap-hdpi/ic_launcher_fg.png
+SHA-256-Digest: bVBlzr2TZaJDFPdpai/ji5/zaS/71XQvntV0f1T8488=
+
+Name: res/mipmap-mdpi/ic_launcher_fg.png
+SHA-256-Digest: 6lBYZ6fA25hcXrTs+BZ3tIG92tZzoDbBktRrVvip1fE=
+
+Name: res/mipmap-xhdpi/ic_launcher_fg.png
+SHA-256-Digest: +FoZf85Ipb7EH3ZilgSRzYEQ8JauaQIRVDAsJnclZBA=
+
+Name: res/mipmap-xxhdpi/ic_launcher_fg.png
+SHA-256-Digest: VnmgaHGdFUjFpCqke0kj9lOyFfx2FzZDIn5H3cBP6WE=
+
+Name: res/mipmap-xxxhdpi/ic_launcher_fg.png
+SHA-256-Digest: tCLu2VuEzqVdXyIbVW/aZng82yBI92fUGa/nUxSBj4w=
+
+Name: res/xml/network_security_config.xml
+SHA-256-Digest: 4nBxX/TRBKaDMxMDgHv9bfZVYiRcejx4pkb7BR+9Xu0=
+
+Name: resources.arsc
+SHA-256-Digest: /BeEB4tv8udhvoRCVAWbitSMVdGgbbdAh4FWtPG1PHs=
+

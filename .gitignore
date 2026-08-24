@@ -3,3 +3,7 @@ dist/
 keystore/*.keystore
 decompiled/apktool-raw/build/
 decompiled/apktool-readable/build/
+decompiled/apliqxcam-working/build/
+reference/
+scripts/sample-fps.sh
+scripts/test-overlay-buttons.sh

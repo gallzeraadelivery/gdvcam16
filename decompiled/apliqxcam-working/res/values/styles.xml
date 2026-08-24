@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.ApexCam" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">#fff3f4f6</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:colorAccent">#ff0891b2</item>
+        <item name="android:statusBarColor">#fff3f4f6</item>
+        <item name="android:navigationBarColor">#fff3f4f6</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

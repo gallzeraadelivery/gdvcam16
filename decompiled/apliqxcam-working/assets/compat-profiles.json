@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "profiles": [
+    {
+      "id": "legacy-6303265a",
+      "cameraServerSha256": "6303265af6f750cb41d74f609c5fdb6785b999722fcee2c3a78137551f3169b0",
+      "resultOffset": "21a780",
+      "usageOffset": "1eedb0",
+      "status": "legacy"
+    },
+    {
+      "id": "legacy-ab88845e",
+      "cameraServerSha256": "ab88845e626eec211f1dd2599ff8b5f672551f370c8012761176dbb8ebdeadcd",
+      "resultOffset": "24de40",
+      "usageOffset": "229d00",
+      "status": "legacy"
+    },
+    {
+      "id": "legacy-9901da72",
+      "cameraServerSha256": "9901da72a2005fdb79cd0836f8ce63888721d077b6fda8f548a89277a3aca03b",
+      "resultOffset": "24ca20",
+      "usageOffset": "228f10",
+      "status": "legacy"
+    },
+    {
+      "id": "legacy-fd35282d",
+      "cameraServerSha256": "fd35282d0ab974ae4209dac211a3ae563602a34e242d86fc29b675353fd4f3a3",
+      "resultOffset": "24ca20",
+      "usageOffset": "228f10",
+      "status": "legacy"
+    },
+    {
+      "id": "legacy-ae1a6841",
+      "cameraServerSha256": "ae1a6841e550aa9147a79c48ebe0b5529f34f35822515a161f016e8fa09f0b24",
+      "resultOffset": "2492c0",
+      "usageOffset": "2257b0",
+      "status": "legacy"
+    },
+    {
+      "id": "xiaomi-malachite-os3-0-304",
+      "manufacturer": "Xiaomi",
+      "model": "24090RA29C",
+      "device": "malachite",
+      "hardware": "mt6878",
+      "android": 16,
+      "sdk": 36,
+      "firmware": "OS3.0.304.0.WOOMIXM",
+      "fingerprint": "Redmi/malachite/malachite:16/BP2A.250605.031.A3/OS3.0.304.0.WOOMIXM:user/release-keys",
+      "cameraServerSha256": "52b78aebaff04bde442566bb0c4929d281124ccaaecdcc4d698e759449f12b99",
+      "cameraServerSize": 4047800,
+      "resultOffset": "2546e0",
+      "usageOffset": "22fca0",
+      "root": "KernelSU",
+      "status": "verified",
+      "verifiedAt": "2026-08-20"
+    }
+  ]
+}
