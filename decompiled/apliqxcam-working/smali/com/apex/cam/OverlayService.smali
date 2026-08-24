@@ -1431,7 +1431,7 @@
 
     const-string v7, "rotation_degrees"
 
-    const/16 v8, 0x10e
+    const/4 v8, 0x0
 
     invoke-interface {v1, v7, v8}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
 
@@ -1453,7 +1453,7 @@
 
     invoke-direct {v9, v10}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
 
-    add-int/lit8 v7, v7, 0x5a
+    add-int/lit8 v7, v7, 0x0
 
     rem-int/lit16 v7, v7, 0x168
 

@@ -81,15 +81,9 @@
     invoke-virtual {v4}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
 
     :try_start_0
+    invoke-static {v5, v3}, Lcom/apex/cam/MainActivity;->P(Landroid/content/SharedPreferences;I)V
+
     invoke-static {v5, v2}, La/f;->Q(Landroid/content/SharedPreferences;Z)V
-
-    invoke-interface {v5, v1, v0}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
-
-    move-result p0
-
-    if-ne p0, v3, :cond_0
-
-    invoke-static {v5}, La/f;->j(Landroid/content/SharedPreferences;)V
 
     :cond_0
     invoke-virtual {v4}, Lcom/apex/cam/OverlayService;->j()V
@@ -116,13 +110,11 @@
     const-string p0, "M\u00eddia "
 
     :try_start_1
-    invoke-interface {v5, v1, v0}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
+    invoke-static {v5, v3}, Lcom/apex/cam/MainActivity;->P(Landroid/content/SharedPreferences;I)V
 
-    move-result v1
+    iput-boolean v2, v4, Lcom/apex/cam/MainActivity;->a0:Z
 
-    if-ne v1, v3, :cond_1
-
-    invoke-static {v5}, La/f;->j(Landroid/content/SharedPreferences;)V
+    invoke-virtual {v4}, Lcom/apex/cam/MainActivity;->M()V
 
     goto :goto_1
 
@@ -130,11 +122,6 @@
     move-exception p0
 
     goto :goto_2
-
-    :cond_1
-    const-string v1, "PIDS=$(pidof apexcam-streamer 2>/dev/null); [ -z \"$PIDS\" ] || kill $PIDS 2>/dev/null; true"
-
-    invoke-static {v1}, Lcom/apex/cam/MainActivity;->z(Ljava/lang/String;)La/e;
 
     :goto_1
     new-instance v1, Ljava/lang/StringBuilder;

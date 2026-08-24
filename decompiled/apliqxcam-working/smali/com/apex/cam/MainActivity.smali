@@ -222,6 +222,77 @@
     return-object p0
 .end method
 
+# Activate the selected media slot through the same live-video pipeline for
+# Front, Back and Selfie.  Keeping this in one helper prevents the overlay and
+# the main screen from diverging when channels are switched.
+.method public static P(Landroid/content/SharedPreferences;I)V
+    .locals 4
+
+    new-instance v0, Ljava/lang/StringBuilder;
+
+    const-string v1, "/data/local/tmp/apexcam/media-"
+
+    invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v0, p1}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    const-string v1, ".mp4"
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-interface {p0}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
+
+    move-result-object v1
+
+    const-string v2, "stream_ready"
+
+    const/4 v3, 0x1
+
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+
+    move-result-object v1
+
+    const-string v2, "stream_url"
+
+    invoke-interface {v1, v2, v0}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
+
+    move-result-object v0
+
+    const-string v1, "live_slot"
+
+    invoke-interface {v0, v1, p1}, Landroid/content/SharedPreferences$Editor;->putInt(Ljava/lang/String;I)Landroid/content/SharedPreferences$Editor;
+
+    move-result-object p1
+
+    invoke-interface {p1}, Landroid/content/SharedPreferences$Editor;->apply()V
+
+    # A daemon status file can survive after apexcamd or cameraserver dies.
+    # Recreate the daemon when needed and reinject only if the recorded camera
+    # PID differs from the currently running cameraserver.
+    const-string p1, "if ! pidof apexcamd apexcamd.new >/dev/null 2>&1; then setsid /data/local/tmp/apexcamd.new >/data/local/tmp/apexcamd.log 2>&1 < /dev/null & for I in $(seq 1 40); do pidof apexcamd apexcamd.new >/dev/null 2>&1 && [ -p /data/local/tmp/apexcam/command.fifo ] && break; sleep 0.1; done; fi; CUR=$(pidof cameraserver | awk '{print $1}'); OLD=$(awk -F'[ =]' '/^detail=pid=/{print $3}' /data/local/tmp/apexcam/daemon.status | head -1); if [ -z \"$CUR\" ] || [ \"$CUR\" != \"$OLD\" ] || ! grep -q '^state=active' /data/local/tmp/apexcam/daemon.status 2>/dev/null; then rm -f /data/local/tmp/apexcam/daemon.status; timeout 8 sh -c 'echo start > /data/local/tmp/apexcam/command.fifo'; for I in $(seq 1 120); do grep -q '^state=active' /data/local/tmp/apexcam/daemon.status 2>/dev/null && break; sleep 0.1; done; fi; true"
+
+    invoke-static {p1}, Lcom/apex/cam/MainActivity;->z(Ljava/lang/String;)La/e;
+
+    const-string p1, "PIDS=$(pidof apexcam-streamer 2>/dev/null); [ -z \"$PIDS\" ] || kill $PIDS 2>/dev/null; rm -f /data/local/tmp/apexcam/live-buffer.nv21 /data/local/tmp/apexcam/live-stable.nv21; true"
+
+    invoke-static {p1}, Lcom/apex/cam/MainActivity;->z(Ljava/lang/String;)La/e;
+
+    invoke-static {p0}, La/f;->j(Landroid/content/SharedPreferences;)V
+
+    # Match Xiaomi's native camera aspect to the selected source.  The live
+    # buffer is landscape because Camera rotates it for portrait display:
+    # 1920x1080 -> 9:16 and 1440x1080 -> 3:4.
+    const-string p0, "F=/data/local/tmp/apexcam/live-buffer.nv21; W=$(od -An -t u4 -N 4 -j 8 $F | tr -d ' '); H=$(od -An -t u4 -N 4 -j 12 $F | tr -d ' '); if [ -z \"$W\" ] || [ -z \"$H\" ]; then echo 'missing dimensions' > /data/local/tmp/apexcam/aspect.status; exit 0; fi; if [ $((W * 3)) -eq $((H * 4)) ]; then MODE=4x3; else MODE=16x9; fi; am force-stop com.android.camera 2>/dev/null; sleep 1; RC=0; for P in /data/user/0/com.android.camera/shared_prefs/camera_settings_simple_mode_local_0.xml /data/user/0/com.android.camera/shared_prefs/camera_settings_simple_mode_local_1.xml; do nsenter -t 1 -m -- test -f \"$P\" || continue; nsenter -t 1 -m -- sed -i \"/pref_camera_picturesize_key/s#>[^<]*<#>$MODE<#\" \"$P\" || RC=$?; done; echo \"$W $H $MODE rc=$RC\" > /data/local/tmp/apexcam/aspect.status; nsenter -t 1 -m -- grep pref_camera_picturesize_key /data/user/0/com.android.camera/shared_prefs/camera_settings_simple_mode_local_0.xml >> /data/local/tmp/apexcam/aspect.status 2>&1; chmod 666 /data/local/tmp/apexcam/aspect.status; true"
+
+    invoke-static {p0}, Lcom/apex/cam/MainActivity;->z(Ljava/lang/String;)La/e;
+
+    return-void
+.end method
+
 .method public static j(Ljava/io/File;Ljava/lang/String;)V
     .locals 6
 
@@ -1629,7 +1700,7 @@
 
     const/4 v4, 0x3
 
-    if-ne v3, v4, :cond_1
+    goto :cond_1
 
     add-int/lit16 v2, v2, 0xb4
 
@@ -1644,7 +1715,7 @@
 
     iget v3, p0, Lcom/apex/cam/MainActivity;->W:I
 
-    if-ne v3, v4, :cond_2
+    goto :cond_2
 
     if-nez v2, :cond_3
 
@@ -1796,10 +1867,6 @@
     move-result-object v1
 
     invoke-interface {v1}, Landroid/content/SharedPreferences$Editor;->apply()V
-
-    iget-boolean v1, p0, Lcom/apex/cam/MainActivity;->a0:Z
-
-    if-eqz v1, :cond_1
 
     new-instance v1, La/L;
 
@@ -2542,6 +2609,10 @@
 
     invoke-static {v0}, Lcom/apex/cam/MainActivity;->z(Ljava/lang/String;)La/e;
 
+    const-string v0, "touch /data/local/tmp/apexcam/rotate.request; chmod 666 /data/local/tmp/apexcam/rotate.request; OLD=$(cat /data/local/tmp/apexcam/rotate-watcher.pid 2>/dev/null); [ -z \"$OLD\" ] || kill $OLD 2>/dev/null; nohup sh -c 'LAST=; while true; do CUR=$(cat /data/local/tmp/apexcam/rotate.request 2>/dev/null); if [ -n \"$CUR\" ] && [ \"$CUR\" != \"$LAST\" ]; then set -- $CUR; SLOT=$1; shift; TMP=/data/local/tmp/apexcam/media-$SLOT.xform.tmp; printf \"%s %s %s %s\\n\" \"$1\" \"$2\" \"$3\" \"$4\" > $TMP; chmod 666 $TMP; mv -f $TMP /data/local/tmp/apexcam/media-$SLOT.xform; LAST=\"$CUR\"; fi; sleep 1; done' >/data/local/tmp/apexcam/rotate-watcher.log 2>&1 & echo $! > /data/local/tmp/apexcam/rotate-watcher.pid; true"
+
+    invoke-static {v0}, Lcom/apex/cam/MainActivity;->z(Ljava/lang/String;)La/e;
+
     const-string v0, "apexcam-streamer"
 
     const-string v1, "/data/local/tmp/apexcam/apexcam-streamer"
@@ -2551,6 +2622,12 @@
     const-string v0, "gdvcam-ffmpeg"
 
     const-string v1, "/data/local/tmp/apexcam/gdvcam-ffmpeg"
+
+    invoke-virtual {p0, v0, v1}, Lcom/apex/cam/MainActivity;->i(Ljava/lang/String;Ljava/lang/String;)V
+
+    const-string v0, "gdvcam-raw-ffmpeg"
+
+    const-string v1, "/data/local/tmp/apexcam/gdvcam-raw-ffmpeg"
 
     invoke-virtual {p0, v0, v1}, Lcom/apex/cam/MainActivity;->i(Ljava/lang/String;Ljava/lang/String;)V
 
@@ -2968,6 +3045,10 @@
     move-object/from16 v0, p0
 
     invoke-super/range {p0 .. p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
+
+    const-string v1, "touch /data/local/tmp/apexcam/rotate.request; chmod 666 /data/local/tmp/apexcam/rotate.request; OLD=$(cat /data/local/tmp/apexcam/rotate-watcher.pid 2>/dev/null); [ -z \"$OLD\" ] || kill $OLD 2>/dev/null; nohup sh -c 'LAST=; while true; do CUR=$(cat /data/local/tmp/apexcam/rotate.request 2>/dev/null); if [ -n \"$CUR\" ] && [ \"$CUR\" != \"$LAST\" ]; then set -- $CUR; SLOT=$1; shift; TMP=/data/local/tmp/apexcam/media-$SLOT.xform.tmp; printf \"%s %s %s %s\\n\" \"$1\" \"$2\" \"$3\" \"$4\" > $TMP; chmod 666 $TMP; mv -f $TMP /data/local/tmp/apexcam/media-$SLOT.xform; LAST=\"$CUR\"; fi; sleep 1; done' >/data/local/tmp/apexcam/rotate-watcher.log 2>&1 & echo $! > /data/local/tmp/apexcam/rotate-watcher.pid; true"
+
+    invoke-static {v1}, Lcom/apex/cam/MainActivity;->z(Ljava/lang/String;)La/e;
 
     const-string v1, "apexcam"
 
@@ -5804,7 +5885,7 @@
 
     const-string v2, "rotation_degrees"
 
-    const/16 v4, 0x10e
+    const/4 v4, 0x0
 
     invoke-interface {v3, v2, v4}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
 
@@ -5871,7 +5952,7 @@
 
     iget v4, v0, Lcom/apex/cam/MainActivity;->X:I
 
-    add-int/lit8 v4, v4, 0x5a
+    add-int/lit8 v4, v4, 0x0
 
     rem-int/lit16 v4, v4, 0x168
 
@@ -6461,6 +6542,12 @@
 
     invoke-virtual {p0, v0, v1}, Lcom/apex/cam/MainActivity;->i(Ljava/lang/String;Ljava/lang/String;)V
 
+    const-string v0, "gdvcam-raw-ffmpeg"
+
+    const-string v1, "/data/local/tmp/apexcam/gdvcam-raw-ffmpeg"
+
+    invoke-virtual {p0, v0, v1}, Lcom/apex/cam/MainActivity;->i(Ljava/lang/String;Ljava/lang/String;)V
+
     new-instance v0, La/N;
 
     const-string v1, "Copiando v\u00eddeo"
@@ -6561,9 +6648,9 @@
 
     invoke-static {v0, v1}, Lcom/apex/cam/MainActivity;->j(Ljava/io/File;Ljava/lang/String;)V
 
-    # Convert portrait videos to the camera's native 4:3 frame before the
-    # streamer reads them. Scale-to-fill plus a centered crop preserves the
-    # source proportions instead of stretching 480x854 directly to 640x480.
+    # Supported inputs are portrait 9:16 and 3:4. The native camera rotates
+    # its landscape buffer clockwise, so pre-rotate counter-clockwise once.
+    # After that compensation, fit without stretching or cropping.
     move-object v10, v0
 
     new-instance v0, Ljava/lang/StringBuilder;
@@ -6574,7 +6661,7 @@
 
     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    const-string v2, "' -an -vf 'transpose=clock,scale=640:480:force_original_aspect_ratio=increase,crop=640:480' -c:v mpeg4 -q:v 3 '"
+    const-string v2, "' -an -vf 'transpose=cclock,scale=-2:1080:flags=lanczos' -c:v mpeg4 -q:v 1 '"
 
     invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
@@ -6592,7 +6679,25 @@
 
     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    const-string v2, "'"
+    const-string v2, "' && /data/local/tmp/apexcam/gdvcam-ffmpeg -i '"
+
+    invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    const-string v2, "' 2>&1 | grep -oE '[0-9]{3,5}x[0-9]{3,5}' | head -n 1 | tr x ' ' > '"
+
+    invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    const-string v2, ".size'; chmod 666 '"
+
+    invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    const-string v2, ".size'"
 
     invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
@@ -6773,7 +6878,7 @@
 
     invoke-virtual {v0, p1}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
 
-    const-string v4, ".size"
+    const-string v4, ".nominal-size"
 
     invoke-virtual {v0, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
@@ -6781,8 +6886,30 @@
 
     move-result-object v0
 
-    # The preprocessor has already produced the camera-native frame.
-    const-string v4, "640 480\n"
+    # Keep the relay output at the actual converted-video dimensions.  This
+    # preserves 1920x1080 for 9:16 and 1440x1080 for 3:4 instead of forcing
+    # both through the old 640x480 compatibility fallback.
+    new-instance v4, Ljava/lang/StringBuilder;
+
+    const-string v5, "cat /data/local/tmp/apexcam/media-"
+
+    invoke-direct {v4, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v4, p1}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    const-string v5, ".mp4.size"
+
+    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v4
+
+    invoke-static {v4}, Lcom/apex/cam/MainActivity;->z(Ljava/lang/String;)La/e;
+
+    move-result-object v4
+
+    iget-object v4, v4, La/e;->b:Ljava/lang/String;
 
     invoke-static {v4, v0}, Lcom/apex/cam/MainActivity;->l(Ljava/lang/String;Ljava/lang/String;)V
 
@@ -6939,6 +7066,13 @@
     const-string v2, "/data/local/tmp/apexcam/decode.mode"
 
     invoke-static {v1, v2}, Lcom/apex/cam/MainActivity;->l(Ljava/lang/String;Ljava/lang/String;)V
+
+    # The selected slot path is reused (media-N.mp4). A running streamer keeps
+    # the old inode open, so force a clean restart before asking j() to start
+    # the newly selected file.
+    const-string v1, "PIDS=$(pidof apexcam-streamer 2>/dev/null); [ -z \"$PIDS\" ] || kill -9 $PIDS 2>/dev/null; RPIDS=$(pidof apliqxcam-frame-relay 2>/dev/null); [ -z \"$RPIDS\" ] || kill -9 $RPIDS 2>/dev/null; rm -f /data/local/tmp/apexcam/live-buffer.nv21 /data/local/tmp/apexcam/live-stable.nv21 /data/local/tmp/apexcam/stream.pid /data/local/tmp/apexcam/loop.pid; true"
+
+    invoke-static {v1}, Lcom/apex/cam/MainActivity;->z(Ljava/lang/String;)La/e;
 
     invoke-virtual {p0, v0, v7}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
 

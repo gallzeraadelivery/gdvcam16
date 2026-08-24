@@ -108,25 +108,47 @@
 
     move-result-object p0
 
-    iget p1, v3, Lcom/apex/cam/OverlayService;->s:I
+    const-string p1, "rotation_degrees"
 
-    invoke-static {p0, p1}, La/f0;->b(Landroid/content/SharedPreferences;I)La/X;
+    invoke-interface {p0, p1, v2}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
 
-    move-result-object v0
+    move-result v0
 
-    iget v1, v0, La/X;->d:I
+    add-int/lit8 v0, v0, 0x5a
 
-    add-int/lit8 v1, v1, 0x5a
+    rem-int/lit16 v0, v0, 0x168
 
-    rem-int/lit16 v1, v1, 0x168
+    invoke-interface {p0}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
 
-    iput v1, v0, La/X;->d:I
+    move-result-object v2
 
-    invoke-static {p0, p1, v0}, La/f0;->d(Landroid/content/SharedPreferences;ILa/X;)V
+    invoke-interface {v2, p1, v0}, Landroid/content/SharedPreferences$Editor;->putInt(Ljava/lang/String;I)Landroid/content/SharedPreferences$Editor;
 
-    invoke-static {p1, v0}, La/f0;->e(ILa/X;)V
+    move-result-object p1
+
+    invoke-interface {p1}, Landroid/content/SharedPreferences$Editor;->apply()V
+
+    iget v1, v3, Lcom/apex/cam/OverlayService;->s:I
+
+    invoke-static {p0, v1}, La/f0;->b(Landroid/content/SharedPreferences;I)La/X;
+
+    move-result-object v2
+
+    iput v0, v2, La/X;->d:I
+
+    invoke-static {p0, v1, v2}, La/f0;->d(Landroid/content/SharedPreferences;ILa/X;)V
 
     invoke-virtual {v3}, Lcom/apex/cam/OverlayService;->h()V
+
+    new-instance p1, La/O;
+
+    const/4 v0, 0x2
+
+    invoke-direct {p1, p0, v0}, La/O;-><init>(Landroid/content/SharedPreferences;I)V
+
+    iget-object p0, v3, Lcom/apex/cam/OverlayService;->a:Ljava/util/concurrent/ExecutorService;
+
+    invoke-interface {p0, p1}, Ljava/util/concurrent/Executor;->execute(Ljava/lang/Runnable;)V
 
     return-void
 

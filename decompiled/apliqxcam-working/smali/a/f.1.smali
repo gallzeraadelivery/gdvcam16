@@ -1466,13 +1466,13 @@
 
     const-string v4, "rotation_degrees"
 
-    const/16 v5, 0x10e
+    const/4 v5, 0x0
 
     invoke-interface {p0, v4, v5}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
 
     move-result v4
 
-    if-ne v2, v3, :cond_0
+    goto :cond_0
 
     add-int/lit16 v4, v4, 0xb4
 
@@ -1487,7 +1487,7 @@
 
     move-result v5
 
-    if-ne v2, v3, :cond_2
+    goto :cond_2
 
     if-nez v5, :cond_1
 
@@ -2890,6 +2890,12 @@
     invoke-direct {v4, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
 
     invoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    const-string v0, " "
+
+    invoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v4, p0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
 
     const-string v0, " >/data/local/tmp/apexcam/stream.log 2>&1 & echo $! > /data/local/tmp/apexcam/stream.pid; nohup /data/local/tmp/apexcam/apliqxcam-frame-relay >/data/local/tmp/apexcam/relay.log 2>&1 & true"
 

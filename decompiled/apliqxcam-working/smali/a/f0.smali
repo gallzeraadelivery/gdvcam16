@@ -628,6 +628,12 @@
 
     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
 
+    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    const-string v1, " "
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
     iget v1, p1, La/X;->a:F
 
     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(F)Ljava/lang/StringBuilder;
@@ -660,23 +666,9 @@
 
     move-result-object p1
 
-    new-instance v0, Ljava/lang/StringBuilder;
-
-    const-string v1, "/data/local/tmp/apexcam/media-"
-
-    invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
-
-    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
-
-    const-string p0, ".xform"
-
-    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object p0
-
     new-instance v0, Ljava/io/FileOutputStream;
+
+    const-string p0, "/data/local/tmp/apexcam/rotate.request"
 
     invoke-direct {v0, p0}, Ljava/io/FileOutputStream;-><init>(Ljava/lang/String;)V
 

@@ -581,7 +581,7 @@
 
     iget p1, v4, Lcom/apex/cam/MainActivity;->X:I
 
-    add-int/lit8 p1, p1, 0x5a
+    add-int/lit8 p1, p1, 0x0
 
     rem-int/lit16 p1, p1, 0x168
 
