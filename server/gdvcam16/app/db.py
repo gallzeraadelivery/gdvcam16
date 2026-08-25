@@ -85,6 +85,7 @@ class DeviceProfile(Base):
     state: Mapped[str] = mapped_column(String(20), default="pending", index=True)
     result_offset: Mapped[str | None] = mapped_column(String(32), nullable=True)
     usage_offset: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    recovery_mode: Mapped[str] = mapped_column(String(24), default="standard")
     reports: Mapped[int] = mapped_column(Integer, default=0)
     failures: Mapped[int] = mapped_column(Integer, default=0)
     first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -123,4 +124,3 @@ def session_scope():
         yield db
     finally:
         db.close()
-

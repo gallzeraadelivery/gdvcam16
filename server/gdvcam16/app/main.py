@@ -171,7 +171,8 @@ def compat_plan(cs: str = Query("", max_length=64), fp: str = Query("", max_leng
     profile = query.order_by(DeviceProfile.last_seen_at.desc()).first()
     supported = bool(profile and profile.state == "functional" and profile.result_offset and profile.usage_offset)
     return {"ok": True, "supported": supported, "status": profile.state if profile else "pending",
-            "result": profile.result_offset if supported else "", "usage": profile.usage_offset if supported else ""}
+            "result": profile.result_offset if supported else "", "usage": profile.usage_offset if supported else "",
+            "recovery": profile.recovery_mode if profile else "standard"}
 
 
 @app.get("/admin/login", response_class=HTMLResponse)
@@ -335,12 +336,16 @@ def compatibility_page(request: Request, db: Session = Depends(session_scope), a
 
 @app.post("/admin/compatibility/{profile_id}")
 def update_profile(profile_id: int, state: str = Form(...), result_offset: str = Form(""), usage_offset: str = Form(""),
+                   recovery_mode: str = Form("standard"),
                    db: Session = Depends(session_scope), admin: Admin = Depends(admin_user)):
     if state not in {"functional", "pending", "failed", "blocked"}: fail("estado invalido")
+    if recovery_mode not in {"standard", "restart_daemon"}: fail("recuperacao invalida")
     row = db.get(DeviceProfile, profile_id)
     if row is None: fail("perfil nao encontrado", 404)
     if state == "functional" and (not result_offset.strip() or not usage_offset.strip()): fail("offsets obrigatorios")
     row.state, row.result_offset, row.usage_offset = state, result_offset.strip() or None, usage_offset.strip() or None
-    db.add(Audit(actor=admin.username, action="profile.update", target=str(row.id), detail=f"state={state}"))
+    row.recovery_mode = recovery_mode
+    db.add(Audit(actor=admin.username, action="profile.update", target=str(row.id),
+                 detail=f"state={state};recovery={recovery_mode}"))
     db.commit()
     return RedirectResponse("/admin/compatibility?ok=updated", status_code=303)

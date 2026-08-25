@@ -273,7 +273,30 @@
     # A daemon status file can survive after apexcamd or cameraserver dies.
     # Recreate the daemon when needed and reinject only if the recorded camera
     # PID differs from the currently running cameraserver.
+    const-string p1, "recovery_mode"
+
+    const-string v0, "standard"
+
+    invoke-interface {p0, p1, v0}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object p1
+
+    const-string v0, "restart_daemon"
+
+    invoke-virtual {v0, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result p1
+
+    if-eqz p1, :cond_standard_recovery
+
     const-string p1, "CUR=$(pidof cameraserver | awk '{print $1}'); OLD=$(awk -F'[ =]' '/^detail=pid=/{print $3}' /data/local/tmp/apexcam/daemon.status 2>/dev/null | head -1); if [ -z \"$CUR\" ]; then true; elif [ \"$CUR\" != \"$OLD\" ] || ! grep -q '^state=active' /data/local/tmp/apexcam/daemon.status 2>/dev/null || ! pidof apexcamd apexcamd.new >/dev/null 2>&1 || [ ! -p /data/local/tmp/apexcam/command.fifo ]; then PIDS=$(pidof apexcamd apexcamd.new 2>/dev/null); [ -z \"$PIDS\" ] || kill -9 $PIDS 2>/dev/null; rm -f /data/local/tmp/apexcam/command.fifo /data/local/tmp/apexcam/daemon.status; : > /data/local/tmp/apexcamd.log; setsid /data/local/tmp/apexcamd.new >/data/local/tmp/apexcamd.log 2>&1 < /dev/null & for I in $(seq 1 60); do [ -p /data/local/tmp/apexcam/command.fifo ] && break; sleep 0.1; done; timeout 8 sh -c 'echo start > /data/local/tmp/apexcam/command.fifo'; for I in $(seq 1 120); do grep -q '^state=active' /data/local/tmp/apexcam/daemon.status 2>/dev/null && break; grep -q '^state=error' /data/local/tmp/apexcam/daemon.status 2>/dev/null && break; sleep 0.1; done; fi; true"
+
+    goto :goto_recovery_ready
+
+    :cond_standard_recovery
+    const-string p1, "if ! pidof apexcamd apexcamd.new >/dev/null 2>&1; then setsid /data/local/tmp/apexcamd.new >/data/local/tmp/apexcamd.log 2>&1 < /dev/null & for I in $(seq 1 40); do pidof apexcamd apexcamd.new >/dev/null 2>&1 && [ -p /data/local/tmp/apexcam/command.fifo ] && break; sleep 0.1; done; fi; CUR=$(pidof cameraserver | awk '{print $1}'); OLD=$(awk -F'[ =]' '/^detail=pid=/{print $3}' /data/local/tmp/apexcam/daemon.status | head -1); if [ -z \"$CUR\" ] || [ \"$CUR\" != \"$OLD\" ] || ! grep -q '^state=active' /data/local/tmp/apexcam/daemon.status 2>/dev/null; then rm -f /data/local/tmp/apexcam/daemon.status; timeout 8 sh -c 'echo start > /data/local/tmp/apexcam/command.fifo'; for I in $(seq 1 120); do grep -q '^state=active' /data/local/tmp/apexcam/daemon.status 2>/dev/null && break; sleep 0.1; done; fi; true"
+
+    :goto_recovery_ready
 
     invoke-static {p1}, Lcom/apex/cam/MainActivity;->z(Ljava/lang/String;)La/e;
 

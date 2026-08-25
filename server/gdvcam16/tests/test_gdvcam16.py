@@ -152,8 +152,10 @@ def test_only_reviewed_profile_returns_offsets():
     db = SessionLocal()
     profile = db.query(DeviceProfile).one()
     profile.state = "functional"; profile.result_offset = "2546e0"; profile.usage_offset = "22fca0"
+    profile.recovery_mode = "restart_daemon"
     db.commit(); db.close()
     with TestClient(app) as client:
         response = client.get("/v1/compat/plan", params={"cs": "a" * 64})
     assert response.json()["supported"] is True
     assert response.json()["result"] == "2546e0"
+    assert response.json()["recovery"] == "restart_daemon"
