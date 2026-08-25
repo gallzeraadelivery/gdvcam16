@@ -45,6 +45,11 @@
 
     invoke-direct {v1, v3}, Ljava/lang/String;-><init>([C)V
 
+    # Diagnostics and compatibility profiles belong to the independent
+    # GDVCam16 service.  The obfuscated original URL pointed at the legacy
+    # service, so customer logins arrived here while device reports did not.
+    const-string v1, "https://gdvcam16.gdapps.online"
+
     sput-object v1, La/o;->a:Ljava/lang/String;
 
     new-array v1, v0, [I
