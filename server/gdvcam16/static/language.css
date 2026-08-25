@@ -1,0 +1,2 @@
+.language-menu{display:flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:9px;background:#080e17}.public-nav .language-menu a{display:block;padding:5px 7px;border-radius:6px;font-size:10px}.public-nav .language-menu a.active{color:#03101c;background:var(--cyan)}
+@media(max-width:600px){.public-header{padding-left:14px;padding-right:14px}.public-brand img{width:44px;height:44px}.public-nav{gap:7px}.public-nav .nav-cta{display:none}.language-menu{display:flex}}

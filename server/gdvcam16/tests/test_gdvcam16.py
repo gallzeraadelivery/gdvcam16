@@ -49,10 +49,21 @@ def test_public_home_shows_brand_and_all_plans():
         response = client.get("/")
     assert response.status_code == 200
     assert "/static/gdvcam16-logo.png" in response.text
-    assert "Sua mídia" in response.text
-    assert "Diário" in response.text
-    assert "Semanal" in response.text
-    assert "Mensal" in response.text
+    assert '<html lang="en">' in response.text
+    assert "Your media" in response.text
+    assert "Daily" in response.text
+    assert "Weekly" in response.text
+    assert "Monthly" in response.text
+
+
+def test_public_home_supports_portuguese_and_spanish():
+    with TestClient(app) as client:
+        portuguese = client.get("/?lang=pt")
+        spanish = client.get("/?lang=es")
+        invalid = client.get("/?lang=unknown")
+    assert "Sua mídia" in portuguese.text and "Planos" in portuguese.text
+    assert "Tus medios" in spanish.text and "Planes" in spanish.text
+    assert '<html lang="en">' in invalid.text
 
 
 def test_customer_login_requires_license_and_binds_device():

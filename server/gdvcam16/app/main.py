@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from .config import settings
+from .i18n import LANGUAGES, TEXT, language
 from .db import (
     AccessSession, Admin, Audit, Base, Customer, DeviceProfile, Diagnostic,
     License, Plan, SessionLocal, engine, session_scope,
@@ -90,9 +91,13 @@ def health():
 
 
 @app.get("/", response_class=HTMLResponse)
-def public_home(request: Request, db: Session = Depends(session_scope)):
+def public_home(request: Request, lang: str = Query("en"), db: Session = Depends(session_scope)):
+    lang = language(lang)
     plans = db.query(Plan).filter_by(active=True).order_by(Plan.duration_days.asc()).all()
-    return templates.TemplateResponse("home.html", {"request": request, "plans": plans})
+    return templates.TemplateResponse("home.html", {
+        "request": request, "plans": plans, "lang": lang,
+        "languages": LANGUAGES, "t": TEXT[lang],
+    })
 
 
 @app.post("/v1/auth/login")
