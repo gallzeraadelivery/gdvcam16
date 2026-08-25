@@ -613,7 +613,10 @@
 
     if-eqz p1, :cond_1
 
-    return v1
+    # Still images must use the exact same ffmpeg preparation path as videos.
+    # That path applies the validated portrait-to-camera conversion and emits
+    # 1920x1080 for 9:16 or 1440x1080 for 3:4 without stretching.
+    return v0
 
     :cond_1
     invoke-virtual {p0}, Landroid/net/Uri;->getLastPathSegment()Ljava/lang/String;
@@ -6675,9 +6678,58 @@
     # After that compensation, fit without stretching or cropping.
     move-object v10, v0
 
-    new-instance v0, Ljava/lang/StringBuilder;
+    # The selected source is copied to media-N.mp4 for the stable streamer
+    # contract.  When that source is actually a JPEG/PNG, ffmpeg otherwise
+    # trusts the .mp4 suffix and fails with "moov atom not found".  Force the
+    # image demuxer only for still media; videos retain their proven command.
+    invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
 
+    move-result-object v0
+
+    invoke-virtual {v0, p2}, Landroid/content/ContentResolver;->getType(Landroid/net/Uri;)Ljava/lang/String;
+
+    move-result-object v0
+
+    if-eqz v0, :gdvcam_video_input
+
+    const-string v2, "image/"
+
+    invoke-virtual {v0, v2}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+
+    move-result v0
+
+    if-eqz v0, :gdvcam_video_input
+
+    invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
+
+    move-result-object v0
+
+    invoke-virtual {v0, p2}, Landroid/content/ContentResolver;->getType(Landroid/net/Uri;)Ljava/lang/String;
+
+    move-result-object v0
+
+    const-string v2, "image/png"
+
+    invoke-virtual {v2, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v0
+
+    if-eqz v0, :gdvcam_jpeg_input
+
+    const-string v2, "/data/local/tmp/apexcam/gdvcam-ffmpeg -y -f image2 -c:v png -i '"
+
+    goto :gdvcam_input_ready
+
+    :gdvcam_jpeg_input
+    const-string v2, "/data/local/tmp/apexcam/gdvcam-ffmpeg -y -f image2 -c:v mjpeg -i '"
+
+    goto :gdvcam_input_ready
+
+    :gdvcam_video_input
     const-string v2, "/data/local/tmp/apexcam/gdvcam-ffmpeg -y -i '"
+
+    :gdvcam_input_ready
+    new-instance v0, Ljava/lang/StringBuilder;
 
     invoke-direct {v0, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
 
@@ -6759,6 +6811,29 @@
 
     invoke-direct {v5}, Landroid/media/MediaMetadataRetriever;-><init>()V
 
+    # MediaMetadataRetriever is only needed to create a video thumbnail.  It
+    # rejects ordinary JPEG/PNG sources on this Android build and would abort
+    # an otherwise successful still-image conversion.  The image editor keeps
+    # its own preview, so skip this optional thumbnail step for still media.
+    invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
+
+    move-result-object v6
+
+    invoke-virtual {v6, p2}, Landroid/content/ContentResolver;->getType(Landroid/net/Uri;)Ljava/lang/String;
+
+    move-result-object v6
+
+    if-eqz v6, :gdvcam_video_thumbnail
+
+    const-string v8, "image/"
+
+    invoke-virtual {v6, v8}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+
+    move-result v6
+
+    if-nez v6, :goto_2
+
+    :gdvcam_video_thumbnail
     :try_start_3
     invoke-virtual {v5, p0, p2}, Landroid/media/MediaMetadataRetriever;->setDataSource(Landroid/content/Context;Landroid/net/Uri;)V
 

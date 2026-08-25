@@ -32,7 +32,7 @@
 
 # virtual methods
 .method public final onClick(Landroid/view/View;)V
-    .locals 3
+    .locals 4
 
     iget p1, p0, La/M;->c:I
 
@@ -70,9 +70,31 @@
 
     invoke-virtual {p0, v1}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
 
-    const-string v1, "video/*"
+    # Accept both still images and videos.  The downstream processor already
+    # converts either kind to the same aspect-preserving NV21 media pipeline.
+    const-string v1, "*/*"
 
     invoke-virtual {p0, v1}, Landroid/content/Intent;->setType(Ljava/lang/String;)Landroid/content/Intent;
+
+    const/4 v1, 0x2
+
+    new-array v1, v1, [Ljava/lang/String;
+
+    const/4 v2, 0x0
+
+    const-string v3, "image/*"
+
+    aput-object v3, v1, v2
+
+    const/4 v2, 0x1
+
+    const-string v3, "video/*"
+
+    aput-object v3, v1, v2
+
+    const-string v2, "android.intent.extra.MIME_TYPES"
+
+    invoke-virtual {p0, v2, v1}, Landroid/content/Intent;->putExtra(Ljava/lang/String;[Ljava/lang/String;)Landroid/content/Intent;
 
     const/16 v1, 0x41
 
