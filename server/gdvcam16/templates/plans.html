@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}Planos · GDVCam16{% endblock %}{% block content %}
+<div class="page-title"><div><p class="eyebrow">COMERCIAL</p><h1>Planos</h1></div></div>
+{% if flash %}<p class="alert success">Operação concluída: {{ flash }}.</p>{% endif %}
+<section class="two-columns">
+  <form class="panel form" method="post" action="/admin/plans">
+    <p class="eyebrow">NOVO PLANO</p><h2>Cadastrar plano</h2>
+    <label>Código<input name="code" minlength="2" maxlength="24" pattern="[a-z][a-z0-9_-]{1,23}" placeholder="quarterly" required></label>
+    <label>Nome<input name="name" minlength="2" maxlength="64" placeholder="Trimestral" required></label>
+    <label>Duração em dias<input name="duration_days" type="number" min="1" max="3650" placeholder="90" required></label>
+    <label>Preço (USD)<input name="price" inputmode="decimal" placeholder="89.90" required></label>
+    <button>Cadastrar plano</button>
+  </form>
+  <section class="panel"><p class="eyebrow">CATÁLOGO</p><h2>{{ plans|length }} planos cadastrados</h2>
+    <div class="customer-list">{% for plan in plans %}<article><div><strong>{{ plan.name }}</strong><small>{{ plan.code }} · {{ plan.duration_days }} dia(s) · $ {{ '%.2f'|format(plan.price_cents / 100) }}</small></div><div class="right"><span class="badge {{ 'active' if plan.active else 'revoked' }}">{{ 'ativo' if plan.active else 'inativo' }}</span><form method="post" action="/admin/plans/{{ plan.id }}/toggle"><button class="quiet">{{ 'Desativar' if plan.active else 'Ativar' }}</button></form></div></article>{% else %}<p class="empty">Nenhum plano cadastrado.</p>{% endfor %}</div>
+  </section>
+</section>
+{% endblock %}

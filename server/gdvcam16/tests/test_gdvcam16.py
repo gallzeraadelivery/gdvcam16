@@ -66,6 +66,40 @@ def test_public_home_supports_portuguese_and_spanish():
     assert '<html lang="en">' in invalid.text
 
 
+def test_admin_can_create_and_disable_plan():
+    with TestClient(app, base_url="https://testserver") as client:
+        login = client.post("/admin/login", data={"username": "admin", "password": "AdminStrong123"}, follow_redirects=False)
+        client.cookies.update(login.cookies)
+        created = client.post("/admin/plans", data={"code": "quarterly", "name": "Trimestral",
+                              "duration_days": "90", "price": "89,90"},
+                              follow_redirects=False)
+        assert created.status_code == 303
+        page = client.get("/admin/plans")
+        assert "Trimestral" in page.text and "89.90" in page.text
+        db = SessionLocal()
+        plan = db.query(Plan).filter_by(code="quarterly").one()
+        assert plan.duration_days == 90 and plan.price_cents == 8990 and plan.active
+        plan_id = plan.id
+        db.close()
+        disabled = client.post(f"/admin/plans/{plan_id}/toggle", follow_redirects=False)
+        assert disabled.status_code == 303
+        db = SessionLocal()
+        assert db.get(Plan, plan_id).active is False
+        db.close()
+
+
+def test_admin_rejects_duplicate_or_invalid_plan():
+    with TestClient(app, base_url="https://testserver") as client:
+        login = client.post("/admin/login", data={"username": "admin", "password": "AdminStrong123"}, follow_redirects=False)
+        client.cookies.update(login.cookies)
+        duplicate = client.post("/admin/plans", data={"code": "daily", "name": "Outro diário",
+                                "duration_days": "1", "price": "1.00"})
+        invalid = client.post("/admin/plans", data={"code": "INVALID CODE", "name": "Inválido",
+                              "duration_days": "0", "price": "-1"})
+        assert duplicate.status_code == 409
+        assert invalid.status_code == 400
+
+
 def test_customer_login_requires_license_and_binds_device():
     password = customer_with_license()
     with TestClient(app) as client:

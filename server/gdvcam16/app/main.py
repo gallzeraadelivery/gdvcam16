@@ -1,5 +1,7 @@
 from datetime import timedelta
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
+import re
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
@@ -24,6 +26,7 @@ templates = Jinja2Templates(directory=str(ROOT / "templates"))
 app = FastAPI(title="GDVCam16", docs_url=None, redoc_url=None)
 app.mount("/static", StaticFiles(directory=str(ROOT / "static")), name="static")
 ADMIN_COOKIE = "gdv16_admin"
+PLAN_CODE = re.compile(r"^[a-z][a-z0-9_-]{1,23}$")
 
 
 def fail(message: str, status: int = 400):
@@ -216,6 +219,56 @@ def customers_page(request: Request, db: Session = Depends(session_scope), admin
         "plans": db.query(Plan).filter_by(active=True).all(),
         "licenses": {row.customer_id: row for row in db.query(License).order_by(License.created_at.asc()).all()},
         "flash": request.query_params.get("ok", "")})
+
+
+@app.get("/admin/plans", response_class=HTMLResponse)
+def plans_page(request: Request, db: Session = Depends(session_scope), admin: Admin = Depends(admin_user)):
+    return templates.TemplateResponse("plans.html", {
+        "request": request, "admin": admin,
+        "plans": db.query(Plan).order_by(Plan.duration_days.asc(), Plan.name.asc()).all(),
+        "flash": request.query_params.get("ok", ""),
+    })
+
+
+@app.post("/admin/plans")
+def create_plan(code: str = Form(...), name: str = Form(...), duration_days: int = Form(...),
+                price: str = Form(...), db: Session = Depends(session_scope),
+                admin: Admin = Depends(admin_user)):
+    code = code.strip().lower()
+    name = name.strip()
+    if not PLAN_CODE.fullmatch(code):
+        fail("codigo invalido: use 2 a 24 letras minusculas, numeros, _ ou -")
+    if not 2 <= len(name) <= 64:
+        fail("nome do plano invalido")
+    if not 1 <= duration_days <= 3650:
+        fail("duracao invalida")
+    try:
+        amount = Decimal(price.strip().replace(",", "."))
+        price_cents = int((amount * 100).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+    except (InvalidOperation, ValueError):
+        fail("preco invalido")
+    if price_cents < 0 or price_cents > 100_000_000:
+        fail("preco invalido")
+    if db.query(Plan).filter_by(code=code).first():
+        fail("codigo de plano ja cadastrado", 409)
+    row = Plan(code=code, name=name, duration_days=duration_days, price_cents=price_cents, active=True)
+    db.add(row)
+    db.add(Audit(actor=admin.username, action="plan.create", target=code,
+                 detail=f"days={duration_days};price_cents={price_cents}"))
+    db.commit()
+    return RedirectResponse(f"/admin/plans?ok=created-{code}", status_code=303)
+
+
+@app.post("/admin/plans/{plan_id}/toggle")
+def toggle_plan(plan_id: int, db: Session = Depends(session_scope), admin: Admin = Depends(admin_user)):
+    row = db.get(Plan, plan_id)
+    if row is None:
+        fail("plano nao encontrado", 404)
+    row.active = not row.active
+    state = "active" if row.active else "inactive"
+    db.add(Audit(actor=admin.username, action="plan.toggle", target=row.code, detail=f"state={state}"))
+    db.commit()
+    return RedirectResponse(f"/admin/plans?ok={state}-{row.code}", status_code=303)
 
 
 @app.post("/admin/customers")
