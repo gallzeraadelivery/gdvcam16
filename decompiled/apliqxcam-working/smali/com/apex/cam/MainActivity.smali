@@ -1818,6 +1818,11 @@
 .method public final a(I)V
     .locals 4
 
+    # Play Integrity / Zygisk modules can restart services or partially clean
+    # /data/local/tmp.  Reinstall every operational asset before selecting a
+    # channel so recovery never depends on stale files from the previous boot.
+    invoke-virtual {p0}, Lcom/apex/cam/MainActivity;->k()V
+
     const-string v0, "apexcam"
 
     const/4 v1, 0x0
@@ -2663,6 +2668,12 @@
     const-string v1, "/data/local/tmp/apexcamd.new"
 
     invoke-virtual {p0, v0, v1}, Lcom/apex/cam/MainActivity;->i(Ljava/lang/String;Ljava/lang/String;)V
+
+    # A regular file with this name deadlocks daemon commands.  Validate its
+    # type, recreate it through apexcamd, and wait briefly for readiness.
+    const-string v0, "F=/data/local/tmp/apexcam/command.fifo; if [ -e $F ] && [ ! -p $F ]; then rm -f $F; fi; if ! pidof apexcamd apexcamd.new >/dev/null 2>&1 || [ ! -p $F ]; then PIDS=$(pidof apexcamd apexcamd.new 2>/dev/null); [ -z \"$PIDS\" ] || kill $PIDS 2>/dev/null; rm -f $F /data/local/tmp/apexcam/daemon.status; setsid /data/local/tmp/apexcamd.new >/data/local/tmp/apexcamd.log 2>&1 < /dev/null & for I in $(seq 1 60); do [ -p $F ] && break; sleep 0.1; done; fi; true"
+
+    invoke-static {v0}, Lcom/apex/cam/MainActivity;->z(Ljava/lang/String;)La/e;
 
     return-void
 .end method
