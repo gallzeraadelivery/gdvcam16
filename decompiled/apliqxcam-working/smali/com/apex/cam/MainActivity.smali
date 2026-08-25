@@ -1351,7 +1351,7 @@
 
     new-instance v0, Landroid/content/Intent;
 
-    const-class v1, Lcom/apex/cam/LicenseActivity;
+    const-class v1, Lcom/apex/cam/LoginActivity;
 
     invoke-direct {v0, p0, v1}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
 
@@ -3322,7 +3322,7 @@
 
     new-instance v1, Landroid/content/Intent;
 
-    const-class v2, Lcom/apex/cam/LicenseActivity;
+    const-class v2, Lcom/apex/cam/LoginActivity;
 
     invoke-direct {v1, v0, v2}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
 

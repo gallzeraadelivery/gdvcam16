@@ -3605,7 +3605,9 @@
 .method public static p(Landroid/content/Context;)Z
     .locals 12
 
-    const/4 v0, 0x1
+    invoke-static {p0}, Lcom/apex/cam/LoginActivity;->hasFreshSession(Landroid/content/Context;)Z
+
+    move-result v0
 
     return v0
 
