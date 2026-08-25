@@ -14,7 +14,7 @@ REPORT_FIELDS = {
     "device", "board", "hardware", "fingerprint", "incremental", "patch", "sdk",
     "abi", "google", "lab", "supported", "app", "root", "magisk", "root_manager",
     "selinux", "cs", "cs_size", "hook", "daemon", "runtime_checks", "camera_stack",
-    "runtime_logs", "error", "detail",
+    "runtime_logs", "selinux_denials", "injector_trace", "native_crash", "error", "detail",
 }
 
 
@@ -60,7 +60,8 @@ def clean_report(raw: dict) -> dict:
               "board": 64, "hardware": 64, "fingerprint": 256, "incremental": 96,
               "patch": 16, "abi": 16, "app": 32, "root_manager": 24, "selinux": 24,
               "cs": 64, "hook": 256, "daemon": 256, "runtime_checks": 512,
-              "camera_stack": 2048, "runtime_logs": 4096, "error": 64, "detail": 512}
+              "camera_stack": 2048, "runtime_logs": 4096, "selinux_denials": 4096,
+              "injector_trace": 4096, "native_crash": 4096, "error": 64, "detail": 512}
     for key, limit in limits.items():
         if key in clean:
             clean[key] = str(clean[key] or "").strip()[:limit]
@@ -103,4 +104,3 @@ def store_report(db: Session, raw: dict, category: str) -> DeviceProfile:
         category=category, failure_stage=stage, app_version=str(report.get("app") or ""), data=report,
     ))
     return profile
-

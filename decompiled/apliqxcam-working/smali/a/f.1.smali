@@ -5613,6 +5613,78 @@
 
     invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
+    # Only AVC denials involving the camera process or GDVCam components.
+    # This deliberately avoids uploading the complete kernel or Android log.
+    const-string p0, "dmesg 2>/dev/null | grep -F 'avc: denied' | grep -Ei 'camera|cameraserver|apexcam' | tail -30"
+
+    invoke-static {p0}, La/f;->G(Ljava/lang/String;)La/e;
+
+    move-result-object p0
+
+    iget-object p0, p0, La/e;->b:Ljava/lang/String;
+
+    invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object p0
+
+    const/16 v1, 0x1000
+
+    invoke-static {v1, p0}, La/f;->H(ILjava/lang/String;)Ljava/lang/String;
+
+    move-result-object p0
+
+    const-string v1, "selinux_denials"
+
+    invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
+
+    # Keep the injector timeline needed to correlate cameraserver PID changes,
+    # dlopen failures and native signals; exclude unrelated device logs.
+    const-string p0, "echo ===status===; cat /data/local/tmp/apexcam/daemon.status /data/local/tmp/apexcam-hook-status 2>/dev/null; echo ===injector===; grep -Ei 'pid=|dlopen|handle|signal|error|fail' /data/local/tmp/apexcamd.log 2>/dev/null | tail -40"
+
+    invoke-static {p0}, La/f;->G(Ljava/lang/String;)La/e;
+
+    move-result-object p0
+
+    iget-object p0, p0, La/e;->b:Ljava/lang/String;
+
+    invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object p0
+
+    const/16 v1, 0x1000
+
+    invoke-static {v1, p0}, La/f;->H(ILjava/lang/String;)Ljava/lang/String;
+
+    move-result-object p0
+
+    const-string v1, "injector_trace"
+
+    invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
+
+    # A tightly filtered excerpt of the newest native tombstone, if readable
+    # as root.  It contains only crash identity, signal and backtrace lines.
+    const-string p0, "T=$(ls -t /data/tombstones/tombstone_* 2>/dev/null | head -1); [ -n \"$T\" ] && grep -E '^(Cmdline:|pid:|signal |Abort message:|    #[0-9]+ pc )' \"$T\" | grep -Ei 'cameraserver|apexcam|signal|abort|#[0-9]+ pc' | head -50"
+
+    invoke-static {p0}, La/f;->G(Ljava/lang/String;)La/e;
+
+    move-result-object p0
+
+    iget-object p0, p0, La/e;->b:Ljava/lang/String;
+
+    invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object p0
+
+    const/16 v1, 0x1000
+
+    invoke-static {v1, p0}, La/f;->H(ILjava/lang/String;)Ljava/lang/String;
+
+    move-result-object p0
+
+    const-string v1, "native_crash"
+
+    invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
+
     invoke-virtual {p1}, Ljava/lang/String;->isEmpty()Z
 
     move-result p0

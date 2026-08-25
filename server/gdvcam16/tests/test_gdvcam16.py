@@ -127,7 +127,9 @@ def test_expired_license_is_rejected():
 def test_diagnostic_sanitizes_and_groups_reports():
     payload = {"device_id": "anon", "serial": "never", "key": "never", "maker": "Xiaomi",
                "model": "Model", "fingerprint": "firmware", "sdk": 36, "cs": "a" * 64,
-               "runtime_checks": "daemon=ok fifo=ok hook=fail streamer=ok"}
+               "runtime_checks": "daemon=ok fifo=ok hook=fail streamer=ok",
+               "selinux_denials": "avc: denied camera", "injector_trace": "signal=11",
+               "native_crash": "Cmdline: /system/bin/cameraserver"}
     with TestClient(app) as client:
         one = client.post("/v1/compat", json=payload)
         two = client.post("/v1/compat/error", json=payload)
@@ -141,6 +143,8 @@ def test_diagnostic_sanitizes_and_groups_reports():
     assert profile.reports == 2 and profile.failures == 2
     assert reports[0].failure_stage == "hook"
     assert "serial" not in reports[0].data and "key" not in reports[0].data
+    assert reports[0].data["selinux_denials"] == "avc: denied camera"
+    assert reports[0].data["injector_trace"] == "signal=11"
     db.close()
 
 
