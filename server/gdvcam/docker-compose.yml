@@ -28,12 +28,13 @@ services:
         condition: service_healthy
     networks:
       - default
-      - edge_default
+      - proxy
 
 volumes:
   pgdata:
     name: gdvcam_postgres_data
 
 networks:
-  edge_default:
+  proxy:
     external: true
+    name: gdnew_web
