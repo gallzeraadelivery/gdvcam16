@@ -1,0 +1,4 @@
+{% extends "base.html" %}{% block title %}Entrar · GDVCam16{% endblock %}{% block content %}
+<section class="login-shell"><form class="panel login" method="post" action="/admin/login"><div class="camera-icon"></div><p class="eyebrow">PAINEL SEGURO</p><h1>Administrar GDVCam16</h1><p class="muted">Clientes, licenças e compatibilidade em um só lugar.</p>{% if error %}<p class="alert error">Usuário ou senha inválidos.</p>{% endif %}<label>Usuário<input name="username" autocomplete="username" required></label><label>Senha<input name="password" type="password" autocomplete="current-password" required></label><button type="submit">Entrar</button></form></section>
+{% endblock %}
+
