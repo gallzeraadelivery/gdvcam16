@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minha conta · GDVCam</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <a class="brand brand-link" href="/">GDVCam</a>
+    <nav class="admin-nav">
+      <span class="muted">{{ user.username }}</span>
+      <form method="post" action="/account/logout"><button class="ghost" type="submit">Sair</button></form>
+    </nav>
+  </header>
+  <main class="account-page">
+    {% if flash == "welcome" %}<p class="flash ok">Conta criada. Bem-vindo ao GDnew!</p>{% endif %}
+    {% if flash == "payment" %}<p class="flash ok">Pagamento recebido para processamento. O saldo será atualizado após a confirmação.</p>{% endif %}
+    <section class="account-hero">
+      <div>
+        <p class="eyebrow align-left">Minha carteira</p>
+        <h1>Olá, {{ user.username }}</h1>
+        <p class="muted">{{ user.email }}</p>
+      </div>
+      <div class="balance"><strong>{{ user.credits }}</strong><span>créditos</span></div>
+    </section>
+
+    <h2>Comprar créditos</h2>
+    <section class="plans credit-plans">
+      {% for package in packages %}
+      <article class="card{% if package.popular %} popular{% endif %}">
+        {% if package.popular %}<span class="badge">POPULAR</span>{% endif %}
+        <h2>{{ package.label }}</h2>
+        <p class="price">$ {{ '%.2f'|format(package.price_usd) }}</p>
+        <form method="post" action="/account/checkout/{{ package.id }}"><button type="submit">Comprar</button></form>
+      </article>
+      {% endfor %}
+    </section>
+
+    <section class="account-grid">
+      <div>
+        <h2>Histórico de saldo</h2>
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Data</th><th>Tipo</th><th>Valor</th><th>Saldo</th></tr></thead>
+            <tbody>
+              {% for item in transactions %}
+              <tr><td>{{ item.created_at.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ item.type }}</td><td class="amount {{ 'positive' if item.amount > 0 else 'negative' }}">{{ '%+d'|format(item.amount) }}</td><td>{{ item.balance_after }}</td></tr>
+              {% else %}<tr><td colspan="4" class="muted">Nenhuma movimentação.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h2>Compras</h2>
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Data</th><th>Créditos</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for item in purchases %}
+              <tr><td>{{ item.created_at.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ item.credits }}</td><td><span class="pill {{ item.status }}">{{ item.status }}</span></td></tr>
+              {% else %}<tr><td colspan="3" class="muted">Nenhuma compra.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

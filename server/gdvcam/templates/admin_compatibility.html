@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compatibilidade · GDVCam Admin</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">GDVCam · Admin</div>
+    <nav class="admin-nav">
+      <a href="/admin">Licenças</a>
+      <a href="/admin/customers">Clientes</a>
+      <a class="active" href="/admin/compatibility">Compatibilidade</a>
+      {% if user.role == "admin" %}<a href="/admin/users">Usuários</a>{% endif %}
+      <span class="muted">{{ user.username }}</span>
+      <form method="post" action="/admin/logout"><button class="ghost" type="submit">Sair</button></form>
+    </nav>
+  </header>
+  <main class="admin">
+    {% if flash == "updated" %}<p class="flash ok">Perfil atualizado.</p>{% endif %}
+    <section class="stats">
+      <article><span>{{ counts.functional }}</span>funcionais</article>
+      <article><span>{{ counts.pending }}</span>novos / pendentes</article>
+      <article><span>{{ counts.failed }}</span>com falha</article>
+      <article><span>{{ counts.blocked }}</span>bloqueados</article>
+    </section>
+
+    <form class="card admin-card customer-search" method="get" action="/admin/compatibility">
+      <h2>Filtrar perfis</h2>
+      <select name="status">
+        <option value="">Todos</option>
+        {% for item in ['functional', 'pending', 'failed', 'blocked'] %}
+        <option value="{{ item }}" {% if status == item %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Filtrar</button>
+    </form>
+
+    <section class="table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Aparelho / firmware</th><th>cameraserver</th><th>Relatórios</th><th>Status e perfil</th></tr></thead>
+        <tbody>
+          {% for item in profiles %}
+          <tr>
+            <td><strong>{{ item.manufacturer }} {{ item.model }}</strong><br><span class="muted">{{ item.device }} · Android SDK {{ item.sdk }} · {{ item.hardware }}</span><br><span class="muted fingerprint">{{ item.fingerprint }}</span></td>
+            <td><code class="inline">{{ item.camera_server_sha256[:16] }}…</code><br><span class="muted">{{ item.camera_server_size }} bytes</span></td>
+            <td>{{ item.report_count }} total<br><span class="muted">{{ item.failure_count }} falhas</span></td>
+            <td>
+              <form class="compat-form" method="post" action="/admin/compatibility/{{ item.id }}/status">
+                <select name="status">
+                  {% for state in ['functional', 'pending', 'failed', 'blocked'] %}<option value="{{ state }}" {% if item.status == state %}selected{% endif %}>{{ state }}</option>{% endfor %}
+                </select>
+                <input name="result_offset" value="{{ item.result_offset or '' }}" placeholder="result offset">
+                <input name="usage_offset" value="{{ item.usage_offset or '' }}" placeholder="usage offset">
+                <button class="ghost" type="submit">Salvar</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}<tr><td colspan="4" class="muted">Nenhum perfil recebido.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <h2 class="section-title">Falhas recentes</h2>
+    <section class="table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Data</th><th>Perfil</th><th>Aparelho anônimo</th><th>Tipo</th><th>Etapa</th></tr></thead>
+        <tbody>
+          {% for item in recent %}
+          <tr><td>{{ item.created_at }}</td><td>#{{ item.profile_id }}</td><td><code class="inline">{{ item.device_id or '—' }}</code></td><td>{{ item.kind }}</td><td>{{ item.failure_stage or '—' }}</td></tr>
+          {% else %}<tr><td colspan="5" class="muted">Nenhum diagnóstico recebido.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>
