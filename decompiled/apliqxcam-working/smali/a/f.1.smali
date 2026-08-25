@@ -2108,7 +2108,7 @@
 .end method
 
 .method public static b(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
-    .locals 5
+    .locals 6
 
     new-instance v0, Ljava/lang/StringBuilder;
 
@@ -2165,6 +2165,8 @@
 
     move-result-object v2
 
+    move-object v5, v2
+
     const-string v3, "apexcam"
 
     invoke-virtual {p0, v3, v1}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
@@ -2182,6 +2184,26 @@
     move-result-object v2
 
     invoke-interface {v2}, Landroid/content/SharedPreferences$Editor;->apply()V
+
+    new-instance v2, Ljava/lang/StringBuilder;
+
+    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
+
+    invoke-virtual {v2, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    const-string v3, "\n"
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v2}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v2
+
+    const-string v3, "/data/local/tmp/apexcam/recovery.mode"
+
+    const-string v4, "644"
+
+    invoke-static {v2, v3, v4}, La/f;->o(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 
     const-string v2, "compat_status"
 
