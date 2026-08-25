@@ -44,6 +44,17 @@ def test_health_and_admin_are_independent():
         assert "GDVCam16" in panel.text
 
 
+def test_public_home_shows_brand_and_all_plans():
+    with TestClient(app) as client:
+        response = client.get("/")
+    assert response.status_code == 200
+    assert "/static/gdvcam16-logo.png" in response.text
+    assert "Sua mídia" in response.text
+    assert "Diário" in response.text
+    assert "Semanal" in response.text
+    assert "Mensal" in response.text
+
+
 def test_customer_login_requires_license_and_binds_device():
     password = customer_with_license()
     with TestClient(app) as client:
@@ -97,4 +108,3 @@ def test_only_reviewed_profile_returns_offsets():
         response = client.get("/v1/compat/plan", params={"cs": "a" * 64})
     assert response.json()["supported"] is True
     assert response.json()["result"] == "2546e0"
-

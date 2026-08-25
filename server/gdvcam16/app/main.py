@@ -89,6 +89,12 @@ def health():
     return {"ok": True, "service": "gdvcam16", "version": "1.0.0"}
 
 
+@app.get("/", response_class=HTMLResponse)
+def public_home(request: Request, db: Session = Depends(session_scope)):
+    plans = db.query(Plan).filter_by(active=True).order_by(Plan.duration_days.asc()).all()
+    return templates.TemplateResponse("home.html", {"request": request, "plans": plans})
+
+
 @app.post("/v1/auth/login")
 def customer_login(payload: dict, db: Session = Depends(session_scope)):
     login = str(payload.get("login") or payload.get("username") or "").strip().lower()
@@ -280,4 +286,3 @@ def update_profile(profile_id: int, state: str = Form(...), result_offset: str =
     db.add(Audit(actor=admin.username, action="profile.update", target=str(row.id), detail=f"state={state}"))
     db.commit()
     return RedirectResponse("/admin/compatibility?ok=updated", status_code=303)
-
