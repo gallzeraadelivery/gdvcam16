@@ -5561,6 +5561,31 @@
 
     invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
+    # Capture only small byte windows around the two scanner candidates. This
+    # is enough to validate/disassemble the Pixel function without uploading
+    # the cameraserver binary or any customer/media data.
+    const-string p0, "set -- $(cat /data/local/tmp/apexcam/hook.off 2>/dev/null); F=/data/local/tmp/apexcam/cs.bin; for O in \"$1\" \"$2\"; do case \"$O\" in *[!0-9a-fA-F]*|'') continue;; esac; D=$((0x$O)); [ $D -gt 64 ] || continue; printf 'offset=%s\\n' \"$O\"; od -An -tx1 -v -j $((D-64)) -N 192 \"$F\" 2>/dev/null; done"
+
+    invoke-static {p0}, La/f;->G(Ljava/lang/String;)La/e;
+
+    move-result-object p0
+
+    iget-object p0, p0, La/e;->b:Ljava/lang/String;
+
+    invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object p0
+
+    const/16 v1, 0x1000
+
+    invoke-static {v1, p0}, La/f;->H(ILjava/lang/String;)Ljava/lang/String;
+
+    move-result-object p0
+
+    const-string v1, "hook_code"
+
+    invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
+
     const-string p0, "cat /data/local/tmp/apexcam/daemon.status 2>/dev/null"
 
     invoke-static {p0}, La/f;->G(Ljava/lang/String;)La/e;
@@ -5594,7 +5619,7 @@
     # breaking reports produced by older APKs.
     const-string p0, "diagnostic_schema"
 
-    const/4 v1, 0x3
+    const/4 v1, 0x4
 
     invoke-virtual {v0, p0, v1}, Lorg/json/JSONObject;->put(Ljava/lang/String;I)Lorg/json/JSONObject;
 
@@ -5782,9 +5807,9 @@
 
     invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    # Broader frame syntax used by Android 16 tombstones. Still restricted to
-    # crash metadata and native backtrace lines from the newest tombstone.
-    const-string p0, "T=$(ls -t /data/tombstones/tombstone_* 2>/dev/null | head -1); [ -n \"$T\" ] && grep -E 'Cmdline:|signal [0-9]+|fault addr|Cause:|#[0-9][0-9] pc ' \"$T\" | head -80"
+    # Select the newest cameraserver tombstone, rather than an unrelated
+    # Magisk/root-manager crash, then retain only crash metadata/backtrace.
+    const-string p0, "T=; for C in $(ls -t /data/tombstones/tombstone_* 2>/dev/null); do grep -qE '^Cmdline: .*cameraserver|>>> .*cameraserver.* <<<' \"$C\" 2>/dev/null && { T=$C; break; }; done; [ -n \"$T\" ] && grep -E 'Cmdline:|signal [0-9]+|fault addr|Cause:|#[0-9][0-9] pc ' \"$T\" | head -80"
 
     invoke-static {p0}, La/f;->G(Ljava/lang/String;)La/e;
 
