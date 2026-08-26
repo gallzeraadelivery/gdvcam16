@@ -12,8 +12,8 @@ packageInfo:
   forcedPackageId: 127
   renameManifestPackage: null
 versionInfo:
-  versionCode: 21
-  versionName: 1.5.6-pixel-test
+  versionCode: 22
+  versionName: 1.5.7-pixel-diag
 sharedLibrary: false
 sparseResources: false
 compactEntries: false

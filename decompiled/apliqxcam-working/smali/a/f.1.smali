@@ -5512,6 +5512,55 @@
 
     invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
+    # Exact scanner output. It contains only the two hexadecimal offsets used
+    # by the native hook and no user or media data.
+    const-string p0, "cat /data/local/tmp/apexcam/hook.off 2>/dev/null"
+
+    invoke-static {p0}, La/f;->G(Ljava/lang/String;)La/e;
+
+    move-result-object p0
+
+    iget-object p0, p0, La/e;->b:Ljava/lang/String;
+
+    invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object p0
+
+    const/16 v1, 0x80
+
+    invoke-static {v1, p0}, La/f;->H(ILjava/lang/String;)Ljava/lang/String;
+
+    move-result-object p0
+
+    const-string v1, "hook_offsets"
+
+    invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
+
+    # Map only cameraserver and GDVCam hook regions. This lets the server
+    # validate that the computed target is executable and the usage address
+    # is writable without uploading a process dump.
+    const-string p0, "PID=$(pidof cameraserver | awk '{print $1}'); echo pid=$PID; cat /data/local/tmp/apexcam/hook.off 2>/dev/null | sed 's/^/offsets=/'; [ -n \"$PID\" ] && grep -E '/system/bin/cameraserver|libapexcam_hook' /proc/$PID/maps 2>/dev/null | head -30"
+
+    invoke-static {p0}, La/f;->G(Ljava/lang/String;)La/e;
+
+    move-result-object p0
+
+    iget-object p0, p0, La/e;->b:Ljava/lang/String;
+
+    invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object p0
+
+    const/16 v1, 0x800
+
+    invoke-static {v1, p0}, La/f;->H(ILjava/lang/String;)Ljava/lang/String;
+
+    move-result-object p0
+
+    const-string v1, "hook_memory"
+
+    invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
+
     const-string p0, "cat /data/local/tmp/apexcam/daemon.status 2>/dev/null"
 
     invoke-static {p0}, La/f;->G(Ljava/lang/String;)La/e;
@@ -5545,7 +5594,7 @@
     # breaking reports produced by older APKs.
     const-string p0, "diagnostic_schema"
 
-    const/4 v1, 0x2
+    const/4 v1, 0x3
 
     invoke-virtual {v0, p0, v1}, Lorg/json/JSONObject;->put(Ljava/lang/String;I)Lorg/json/JSONObject;
 
@@ -5593,7 +5642,7 @@
 
     # Compact pass/fail matrix.  This identifies the exact stage that failed
     # without uploading system binaries or private media.
-    const-string p0, "printf 'daemon='; pidof apexcamd apexcamd.new >/dev/null 2>&1 && printf ok || printf fail; printf ' fifo='; test -p /data/local/tmp/apexcam/command.fifo && printf ok || printf fail; printf ' hook='; PID=$(pidof cameraserver | awk '{print $1}'); [ -n \"$PID\" ] && grep -q libapexcam_hook /proc/$PID/maps 2>/dev/null && printf ok || printf fail; printf ' streamer='; pidof apexcam-streamer >/dev/null 2>&1 && printf ok || printf fail; printf ' buffer='; test -s /data/local/tmp/apexcam/live-buffer.nv21 && printf ok || printf fail; printf ' media='; ls /data/local/tmp/apexcam/media-*.mp4 /data/local/tmp/apexcam/media-*.jpg >/dev/null 2>&1 && printf ok || printf fail"
+    const-string p0, "printf 'daemon='; pidof apexcamd apexcamd.new >/dev/null 2>&1 && printf ok || printf fail; printf ' fifo='; test -p /data/local/tmp/apexcam/command.fifo && printf ok || printf fail; printf ' hook='; PID=$(pidof cameraserver | awk '{print $1}'); [ -n \"$PID\" ] && grep -q libapexcam_hook /proc/$PID/maps 2>/dev/null && printf ok || printf fail; printf ' hook_activity='; grep -Eq 'painted=[1-9][0-9]*|calls=[1-9][0-9]*' /data/local/tmp/apexcam-hook-status 2>/dev/null && printf ok || printf fail; printf ' streamer='; pidof apexcam-streamer >/dev/null 2>&1 && printf ok || printf fail; printf ' buffer='; test -s /data/local/tmp/apexcam/live-buffer.nv21 && printf ok || printf fail; printf ' media='; ls /data/local/tmp/apexcam/media-*.mp4 /data/local/tmp/apexcam/media-*.jpg >/dev/null 2>&1 && printf ok || printf fail"
 
     invoke-static {p0}, La/f;->G(Ljava/lang/String;)La/e;
 
@@ -5730,6 +5779,30 @@
     move-result-object p0
 
     const-string v1, "native_crash"
+
+    invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
+
+    # Broader frame syntax used by Android 16 tombstones. Still restricted to
+    # crash metadata and native backtrace lines from the newest tombstone.
+    const-string p0, "T=$(ls -t /data/tombstones/tombstone_* 2>/dev/null | head -1); [ -n \"$T\" ] && grep -E 'Cmdline:|signal [0-9]+|fault addr|Cause:|#[0-9][0-9] pc ' \"$T\" | head -80"
+
+    invoke-static {p0}, La/f;->G(Ljava/lang/String;)La/e;
+
+    move-result-object p0
+
+    iget-object p0, p0, La/e;->b:Ljava/lang/String;
+
+    invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object p0
+
+    const/16 v1, 0x1800
+
+    invoke-static {v1, p0}, La/f;->H(ILjava/lang/String;)Ljava/lang/String;
+
+    move-result-object p0
+
+    const-string v1, "hook_crash"
 
     invoke-virtual {v0, v1, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
