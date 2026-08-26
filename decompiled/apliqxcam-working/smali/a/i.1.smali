@@ -57,10 +57,6 @@
 
     invoke-interface {v0, v1, v2}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 
-    const-string v1, "fd35282d0ab974ae4209dac211a3ae563602a34e242d86fc29b675353fd4f3a3"
-
-    invoke-interface {v0, v1, v2}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-
     const-string v1, "ae1a6841e550aa9147a79c48ebe0b5529f34f35822515a161f016e8fa09f0b24"
 
     const-string v2, "2492c0 2257b0"
